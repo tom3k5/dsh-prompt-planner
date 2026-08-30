@@ -11,7 +11,10 @@ The goal: **keep quality while spending tokens optimally** — trivial tasks go 
 - ✍️ **Prompt improvement** — rewritten prompt with explicit role, goal, steps, output format, acceptance criteria, and `(TBD: …)` placeholders for open decisions; intent and language preserved.
 - 🧩 **Atomic task decomposition** — 4–12 single-responsibility tasks with `dependsOn` dependencies and deliverables; topological execution order.
 - 🎯 **Per-task model routing** — difficulty 1–5 → `deepseek-v4-flash@off/low/high` or `deepseek-v4-pro@high/max`, validated against the live model catalog (`llm.resolveModelInfo`), with fallback to the model's default effort.
-- 📊 **Token estimates** — per-task and total estimates using the same ~4 chars/token heuristic as `dsh-token-meter`.
+- 📊 **Token estimates** — per-task and total estimates via the harness `ctx.tokenMeter` heuristic (local fallback keeps it working without it).
+- ⚙️ **Execution** — optional `execute: true` delegates each task to a subagent running the task's assigned model, returning an `executionReport`.
+- 💾 **Plan to file** — optional `outputFile` atomically writes the plan JSON via `ctx.fs`.
+- ⏱️ **Deadline** — `timeoutMs` guards the whole planning call via `dsh-tool-call-timeout-policy`.
 - 🛡️ **Robust JSON pipeline** — resilient extractor + repair pass (trailing commas, raw newlines in strings) and truncation handling (retry with a larger budget when `max-tokens` is hit).
 
 ## Install (as a profile bundle)
@@ -42,10 +45,12 @@ Tool arguments:
 | --- | --- | --- | --- |
 | `prompt` | string | yes | The prompt / task description to plan. |
 | `skipQuestions` | boolean | no | `true` skips clarifying questions and plans directly. |
+| `execute` | boolean | no | `true` delegates each planned task to a subagent with its assigned model (requires `dsh-subagent` providers). |
+| `outputFile` | string | no | Workspace path to atomically write the plan JSON to. |
 
 ## What it returns
 
-`originalPrompt`, `clarification` (asked / answers / skippedReason), `analysis` (summary / risks / missingInfo), `improvedPrompt`, `taskCount`, `executionOrder`, `tasks[]` (id, title, description, difficulty, dependsOn, deliverable, model, tokens), `tokenEstimate`, `modelsUsed`, `catalog`.
+`originalPrompt`, `clarification` (asked / answers / skippedReason), `analysis` (summary / risks / missingInfo), `improvedPrompt`, `taskCount`, `executionOrder`, `tasks[]` (id, title, description, difficulty, dependsOn, deliverable, model, tokens), `tokenEstimate`, `modelsUsed`, `catalog`; plus, when enabled, `planFile` (outputFile) and `executionReport` (execute).
 
 See [prompt_planner_plugin.md](./prompt_planner_plugin.md) for the full reference.
 
