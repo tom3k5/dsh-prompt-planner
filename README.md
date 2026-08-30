@@ -47,10 +47,12 @@ Tool arguments:
 | `skipQuestions` | boolean | no | `true` skips clarifying questions and plans directly. |
 | `execute` | boolean | no | `true` delegates each planned task to a subagent with its assigned model (requires `dsh-subagent` providers). |
 | `outputFile` | string | no | Workspace path to atomically write the plan JSON to. |
+| `keepArtifacts` | boolean | no | With `execute`, keep files created by the run (default `false` — new files are removed afterwards; only files not present before the run and inside the workspace are touched). |
+| `reviewPlan` | boolean | no | Ask a live user to approve or correct the plan before returning/executing; the plan is rebuilt with the corrections. Skipped when no live user is available. |
 
 ## What it returns
 
-`originalPrompt`, `clarification` (asked / answers / skippedReason), `analysis` (summary / risks / missingInfo), `improvedPrompt`, `taskCount`, `executionOrder`, `tasks[]` (id, title, description, difficulty, dependsOn, deliverable, model, tokens), `tokenEstimate`, `modelsUsed`, `catalog`; plus, when enabled, `planFile` (outputFile) and `executionReport` (execute).
+`originalPrompt`, `clarification` (asked / answers / skippedReason), `analysis` (summary / risks / missingInfo), `improvedPrompt`, `taskCount`, `executionOrder`, `tasks[]` (id, title, description, difficulty, dependsOn, deliverable, model, tokens), `tokenEstimate`, `modelsUsed`, `catalog`; plus, when enabled, `planFile` (outputFile), `executionReport` + `cleanup` (execute), and plan-review corrections folded into the rebuilt plan (reviewPlan).
 
 See [prompt_planner_plugin.md](./prompt_planner_plugin.md) for the full reference.
 
